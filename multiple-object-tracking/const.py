@@ -1,0 +1,10 @@
+cache = 20
+FILE_DIR = "./data/labels"
+VIDEO_PATH = "./data/road.MP4"
+VIDEO_OUTPUT_PATH = "./data/road_out_{}.MP4".format(cache)
+# IMG_RECORDED_PATH = "./record/road_out_{}".format(TERMINATE_SET)
+# FPS = 40
+COLOR_DET = (0, 255, 0)
+COLOR_STA = (0, 0, 255)
+COLOR_MATCH = (255, 255, 0)
+time_kalman = 0
