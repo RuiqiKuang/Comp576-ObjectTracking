@@ -4,4 +4,4 @@ Team member:
 Ruiqi Kuang(rk85)
 Jingtao Lin
 Xinyuan Cai
-Dongming Jiang
+Dongming Jiang(dj37)
