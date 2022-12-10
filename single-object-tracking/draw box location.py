@@ -5,20 +5,20 @@ import numpy as np
 
 from utils import plot_one_box, cal_iou
 
-"使用最大IOU作为判别条件"
+"Use the maximum IOU as a discriminant"
 
-initial_target_box = [729, 238, 764, 339]  # 目标初始bounding box
+initial_target_box = [729, 238, 764, 339]  # Target initial bounding box
 
 if __name__ == "__main__":
-    # 读取视频与标签
+    # Read video with tags
     video_path = "./data/testvideo1.mp4"
     label_path = "./data/labels"
     file_name = "testvideo1"
-    last_frame_box = initial_target_box  # 上一帧的框初始化
+    last_frame_box = initial_target_box  # Frame initialization of the previous frame
     cap = cv2.VideoCapture(video_path)
     frame_counter = 1
     cv2.namedWindow("track", cv2.WINDOW_NORMAL)
-    trace_list = []  # 用于保存目标box的轨迹
+    trace_list = []  # Used to save the track of the target box
     out = None
     SAVE_VIDEO = False
     if SAVE_VIDEO:
@@ -28,7 +28,7 @@ if __name__ == "__main__":
     while True:
         # Capture frame-by-frame
         ret, frame = cap.read()
-        # plot_one_box(last_frame_box, frame, color=(200, 0, 0), target=False)  # 绘制出上一帧的框
+        # plot_one_box(last_frame_box, frame, color=(200, 0, 0), target=False)  # Draw out the frame of the previous frame
 
         if not ret:
             break
