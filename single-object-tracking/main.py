@@ -6,11 +6,11 @@ import numpy as np
 from utils import plot_one_box, cal_iou, xyxy_to_xywh, xywh_to_xyxy, updata_trace_list, draw_trace, \
     show_image_from_matrix
 
-# 目标的状态X = [x,y,h,w,delta_x,delta_y],中心坐标，宽高，中心坐标速度
+# State of the target X = [x,y,h,w,delta_x,delta_y], center coordinates, width and height, center coordinate velocity
 
-IOU_Threshold = 0.3  # 匹配时的阈值
+IOU_Threshold = 0.3  # Threshold value when matching
 
-# 状态转移矩阵
+# State Transfer Matrix
 A = np.array([[1, 0, 0, 0, 1, 0],
               [0, 1, 0, 0, 0, 1],
               [0, 0, 1, 0, 0, 0],
@@ -18,17 +18,17 @@ A = np.array([[1, 0, 0, 0, 1, 0],
               [0, 0, 0, 0, 1, 0],
               [0, 0, 0, 0, 0, 1]])
 
-# 状态观测矩阵
+# State observation matrix
 H = np.eye(6)
-# 过程噪声协方差矩阵Q
+# Process noise covariance matrix Q
 Q = np.eye(6) * 0.1
 
-# 观测噪声协方差矩阵R，p(v)~N(0,R)
+# Observed noise covariance matrix R, p(v)~N(0,R)
 R = np.eye(6) * 1
 
-# 控制输入矩阵B
+# Control input matrix B
 B = None
-# 状态估计协方差矩阵P初始化
+# Initialization of state estimation covariance matrix P
 P = np.eye(6)
 
 if __name__ == "__main__":
@@ -54,7 +54,7 @@ if __name__ == "__main__":
         fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
         out = cv2.VideoWriter('kalman_output.mp4', fourcc, 20, (768, 576))
 
-    # ---------状态初始化----------------------------------------
+    # ---------State initialization----------------------------------------
     frame_counter = 1
     X_posterior = np.array(initial_state)
     P_posterior = np.array(P)
@@ -75,7 +75,7 @@ if __name__ == "__main__":
             content = f.readlines()
             max_iou = IOU_Threshold
             max_iou_matched = False
-            # ---------使用最大IOU来寻找观测值------------
+            # ---------Use the maximum IOU to find observations------------
             for j, data_ in enumerate(content):
                 data = data_.replace('\n', "").split(" ")
                 xyxy = np.array(data[1:5], dtype="float")
@@ -86,7 +86,7 @@ if __name__ == "__main__":
                     max_iou = iou
                     max_iou_matched = True
             if max_iou_matched:
-                # 如果找到了最大IOU BOX,则认为该框为观测值
+                # If the maximum IOU BOX is found, the box is considered as the observed value.
                 plot_one_box(target_box, frame, target=True)
                 xywh = xyxy_to_xywh(target_box)
                 box_center = (int((target_box[0] + target_box[2]) // 2), int((target_box[1] + target_box[3]) // 2))
@@ -99,25 +99,25 @@ if __name__ == "__main__":
                 Z[0:4] = np.array([xywh]).T
                 Z[4::] = np.array([dx, dy])
         if max_iou_matched:
-            # -----进行先验估计-----------------
+            # -----Perform a priori estimation-----------------
             X_prior = np.dot(A, X_posterior)
             box_prior = xywh_to_xyxy(X_prior[0:4])
-            # -----计算状态估计协方差矩阵P--------
+            # -----Calculate the state estimation covariance matrix P--------
             P_prior_1 = np.dot(A, P_posterior)
             P_prior = np.dot(P_prior_1, A.T) + Q
-            # ------计算卡尔曼增益---------------------
+            # ------Calculate Kalman gain---------------------
             k1 = np.dot(P_prior, H.T)
             k2 = np.dot(np.dot(H, P_prior), H.T) + R
             K = np.dot(k1, np.linalg.inv(k2))
-            # --------------后验估计------------
+            # --------------A posteriori estimation------------
             X_posterior_1 = Z - np.dot(H, X_prior)
             X_posterior = X_prior + np.dot(K, X_posterior_1)
             box_posterior = xywh_to_xyxy(X_posterior[0:4])
-            # ---------更新状态估计协方差矩阵P-----
+            # ---------Update the state estimation covariance matrix P-----
             P_posterior_1 = np.eye(6) - np.dot(K, H)
             P_posterior = np.dot(P_posterior_1, P_prior)
         else:
-            # 此时直接迭代，不使用卡尔曼滤波
+            # This is a direct iteration, without Kalman filtering
             X_posterior = np.dot(A, X_posterior)
             box_posterior = xywh_to_xyxy(X_posterior[0:4])
             box_center = (
