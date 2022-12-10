@@ -48,11 +48,11 @@ def cal_iou(box1, box2):
     """
     x1min, y1min, x1max, y1max = box1[0], box1[1], box1[2], box1[3]
     x2min, y2min, x2max, y2max = box2[0], box2[1], box2[2], box2[3]
-    # 计算两个框的面积
+    # Calculate the area of the two frames
     s1 = (y1max - y1min + 1.) * (x1max - x1min + 1.)
     s2 = (y2max - y2min + 1.) * (x2max - x2min + 1.)
 
-    # 计算相交部分的坐标
+    # Calculate the coordinates of the intersection
     xmin = max(x1min, x2min)
     ymin = max(y1min, y2min)
     xmax = min(x1max, x2max)
@@ -64,15 +64,15 @@ def cal_iou(box1, box2):
     intersection = inter_h * inter_w
     union = s1 + s2 - intersection
 
-    # 计算iou
+    # Calculate iou
     iou = intersection / union
     return iou
 
 
 def cal_distance(box1, box2):
     """
-    计算两个box中心点的距离
-    :param box1: xyxy 左上右下
+    Calculate the distance between the center points of two boxes
+    :param box1: xyxy Top left, bottom right
     :param box2: xyxy
     :return:
     """
