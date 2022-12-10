@@ -18,33 +18,33 @@ output_layers_name = [layersName[i - 1] for i in net.getUnconnectedOutLayers()]
 
 def process(img, cnt):
     blobImg = cv2.dnn.blobFromImage(img, 1.0 / 255.0, (416, 416), None, True,
-                                    False)  # # net需要的输入是blob格式的，用blobFromImage这个函数来转格式
-    net.setInput(blobImg)  # # 调用setInput函数将图片送入输入层
+                                    False)  # # The input required by net is in blob format, use the function blobFromImage to convert the format
+    net.setInput(blobImg)  # # Call the setInput function to send the image to the input layer
 
-    # 获取网络输出层信息（所有输出层的名字），设定并前向传播
+    # Get network output layer information (names of all output layers), set and forward propagate
     outInfo = net.getUnconnectedOutLayersNames()
     start = time.time()
-    layerOutputs = net.forward(outInfo)  # 得到各个输出层的、各个检测框等信息，是二维结构。
+    layerOutputs = net.forward(outInfo)  # The information of each output layer, each detection box, etc. is obtained, and is a two-dimensional structure.
     end = time.time()
-    print("[INFO] YOLO took {:.6f} seconds".format(end - start))  # # 可以打印下信息
+    print("[INFO] YOLO took {:.6f} seconds".format(end - start))  # # Print the following information
 
-    # 拿到图片尺寸
+    # Get the picture size
     H, W = img.shape[0], img.shape[1]
-    boxes = []  # 所有框
-    confidences = []  # 所有置信度
-    classIDs = []  # 所有分类ID
+    boxes = []  # All boxes
+    confidences = []  # All confidence levels
+    classIDs = []  # All Category IDs
 
-    # 过滤
+    # Filtering
     for out in layerOutputs:
         for bbox in out:
-            # 拿到置信度
-            scores = bbox[5:]  # 各个类别的置信度
-            classID = np.argmax(scores)  # 最高置信度的id即为分类id
-            confidence = scores[classID]  # 拿到置信度
+            # Get the confidence level
+            scores = bbox[5:]  # Confidence level of each category
+            classID = np.argmax(scores)  # The id with the highest confidence is the classification id
+            confidence = scores[classID]  # Get the confidence level
 
-            # 根据置信度筛查
+            # Screening by confidence level
             if confidence > CONF_THRES:
-                box = bbox[0:4] * np.array([W, H, W, H])  # 将边界框放会图片尺寸
+                box = bbox[0:4] * np.array([W, H, W, H])  # Put the bounding box to the image size
                 (centerX, centerY, width, height) = box.astype("int")
                 x = int(centerX - (width // 2))
                 y = int(centerY - (height // 2))
@@ -52,10 +52,10 @@ def process(img, cnt):
                 confidences.append(float(confidence))
                 classIDs.append(classID)
 
-    # # 2）应用非最大值抑制(non-maxima suppression，nms)进一步筛掉
+    # # 2) Apply non-maxima suppression (non-maxima suppression, nms) to further screen out
     indexes = cv2.dnn.NMSBoxes(boxes, confidences, CONF_THRES, NMS_THRES)
 
-    # 应用检测结果
+    # Application test results
     np.random.seed(42)
     filename = "./data/labels/" + "road_" + str(cnt) + ".txt"
     print(filename)
