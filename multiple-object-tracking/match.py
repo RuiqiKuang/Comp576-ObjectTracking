@@ -9,10 +9,10 @@ class Matcher:
 
     def match(self, state_list, det_list):
         """
-        最大权值匹配
-        :param state_list: 先验状态list
-        :param det_list: 量测list
-        :return: dict 匹配结果
+        Maximum weight matching
+        :param state_list: A priori state list
+        :param det_list: Measurement list
+        :return: dict Matching results
         """
         for idx_state, state in enumerate(state_list):
             state_node = 'state_%d' % idx_state
