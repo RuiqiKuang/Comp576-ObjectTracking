@@ -9,25 +9,25 @@ import detection
 import utils
 from kalman import Kalman
 
-# 状态转移矩阵
+# State Transfer Matrix
 A = np.array([[1, 0, 0, 0, 1, 0],
               [0, 1, 0, 0, 0, 1],
               [0, 0, 1, 0, 0, 0],
               [0, 0, 0, 1, 0, 0],
               [0, 0, 0, 0, 1, 0],
               [0, 0, 0, 0, 0, 1]])
-# 控制输入矩阵B
+# Control input matrix B
 B = None
-# 过程噪声协方差矩阵Q，p(w)~N(0,Q)
+# Process noise covariance matrix Q, p(w) ~ N(0,Q)
 Q = np.eye(A.shape[0]) * 0.1
-# 状态观测矩阵
+# State observation matrix
 H = np.array([[1, 0, 0, 0, 0, 0],
               [0, 1, 0, 0, 0, 0],
               [0, 0, 1, 0, 0, 0],
               [0, 0, 0, 1, 0, 0]])
-# 观测噪声协方差矩阵R，p(v)~N(0,R)
+# Observed noise covariance matrix R, p(v) ~ N(0,R)
 R = np.eye(H.shape[0]) * 1
-# 状态估计协方差矩阵P
+# The state estimation covariance matrix P
 P = np.eye(A.shape[0])
 
 if __name__ == '__main__':
@@ -56,28 +56,28 @@ if __name__ == '__main__':
             break
         for s in state_list:
             s.predict()
-        # 匹配
+        # Matching
         det_list = [utils.box2det(detection) for detection in det_list_frame]
         state_rem_list, det_rem_list, match_list = utils.association(state_list, det_list)
-        # 状态没匹配上,超过一定时间就删除
+        # Status not matched, deleted after a certain time
         state_del = list()
         for idx in state_rem_list:
             status, _, _ = state_list[idx].update()
             if not status:
                 state_del.append(idx)
         state_list = [state_list[i] for i in range(len(state_list)) if i not in state_del]
-        # 测量没匹配上的，作为新生目标进行航迹起始
+        # If the measurement does not match, it will be used as a newborn target for track start.
         for idx in det_rem_list:
             state_list.append(Kalman(A, B, H, Q, R, utils.det2state(det_list[idx]), P))
         # Visualization
-        # 显示所有det到图像上
+        # Show all det to the image
         for det in det_list_frame:
             cv2.rectangle(frame, tuple(det[:2]), tuple(det[2:]), const.COLOR_DET, thickness=1)
-        # 显示所有的state到图像上
+        # Show all states to the image
         for kalman in state_list:
             pos = utils.state2box(kalman.X_posterior)
             cv2.rectangle(frame, tuple(pos[:2]), tuple(pos[2:]), const.COLOR_STA, thickness=2)
-        # 绘制轨迹
+        # Plotting Trajectories
         for kalman in state_list:
             tracks_list = kalman.track
             for idx in range(len(tracks_list) - 1):
