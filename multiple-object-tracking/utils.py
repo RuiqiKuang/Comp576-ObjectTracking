@@ -63,9 +63,9 @@ def cal_iou(state, measure):
 
 def association(kalman_list, det_list):
     """
-    多目标关联，使用最大权重匹配
-    :param kalman_list: 状态列表，存着每个kalman对象，已经完成预测外推
-    :param det_list: 量测列表，存着矩阵形式的目标量测 ndarray [c_x, c_y, w, h].T
+    Multi-target association using maximum weight matching
+    :param kalman_list: Status list with each kalman object that has completed prediction extrapolation
+    :param det_list: A list of measurements that holds the target measurements in matrix form ndarray [c_x, c_y, w, h].T
     :return:
     """
 
@@ -76,11 +76,11 @@ def association(kalman_list, det_list):
         state = kalman.X_prior
         state_list.append(state[0:4])
 
-    # 进行匹配得到一个匹配字典
+    # Matching is done to get a matching dictionary
     M = Matcher()
     match_dict = M.match(state_list, det_list)
 
-    # 根据匹配字典，将匹配上的直接进行更新，没有匹配上的返回
+    # According to the matching dictionary, update the matched ones directly, and return the unmatched ones
     state_used = set()
     det_used = set()
     match_list = list()
@@ -92,5 +92,5 @@ def association(kalman_list, det_list):
         state_used.add(state_index)
         det_used.add(det_index)
 
-    # 求出未匹配状态和量测，返回
+    # Find the unmatched status and measurement, return it
     return list(state_rec - state_used), list(det_rec - det_used), match_list
